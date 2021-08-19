@@ -20,7 +20,9 @@ En esta aplicación de test, el flujo de autenticación basado en token JWT pers
 5. Si el recurso solicitado está protegido, Spring Security usará nuestro `Filter` personalizado para validar el token JWT, y creará un objeto de` Authentication` y lo configurará en el `SecurityContextHolder` específico de Spring Security para completar el progreso de la autenticación.
 6. Si el token JWT es válido, devolverá el recurso solicitado al cliente.
 
-## Genera el esqueleto del proyecto
+## Paso 1 - REST, configuración BBDD y spring security por defecto
+
+### Genera el esqueleto del proyecto
 
 La forma más rápida de crear un nuevo proyecto Spring Boot es usar [Spring Initializr] (http://start.spring.io) para generar los códigos base.
 
@@ -36,7 +38,7 @@ Luego haga clic en el botón **Generar** o presione **ALT + ENTRAR** claves para
 ![start](./start.JPG)
 
 
-## Crea una API REST
+### Crea una API REST
 
 Cree una entidad JPA `Vehicle`.
 
@@ -66,7 +68,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 }
 ```
 
-Create a Spring MVC basec Controller to expose REST APIs.
+Cree un controlador base Spring MVC para exponer las API REST.
 
 ```java
 @RestController
@@ -215,6 +217,8 @@ Ahora es el momento de arrancar y una vez lo hagamos tendremos que fijarnos en l
     Using generated security password: 459da715-9ea1-4447-a0d6-46e0ba979b69
 
 
+Pero de momento nos será más útil comentar la dependencia de spring security para evitarnos meter el usuario y password continuamente.
+
 Ahora es el momento de probar que funciona. Hay varias formas. Puedes utilizar postman, el propio navegador o otra forma puede ser con curl:
 
 Abra una terminal, use `curl` para probar las API.
@@ -228,3 +232,95 @@ Abra una terminal, use `curl` para probar las API.
   "name" : "car"
 } ]
 ```
+
+## Paso 2 - Exponer la API directamente desde el repositorio
+
+Spring Data Rest proporciona la capacidad de exponer las API a través de la interfaz del repositorio directamente.
+
+Add a `@RepositoryRestResource` annotation on the existed `VehicleRepository` interface.
+
+```java
+@RepositoryRestResource(path = "vehicles", collectionResourceRel = "vehicles", itemResourceRel = "vehicle")
+public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
+    
+}
+```
+
+Tendremos que añadir la dependencia en el pom para poder importar la anotación `@RepositoryRestResource` y para usar HATEOAS
+
+```XML
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-hateoas</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-rest</artifactId>
+    </dependency>
+```
+
+Compila y reinicia la aplicación e intenta acceder a:
+
+    http://localhost:8080/vehicles
+
+Importante, sin poner `/v1/` que hemos definido para obtener los datos desde el controller.
+
+```
+curl -X GET http://localhost:8080/vehicles 
+{
+  "_embedded" : {
+    "vehicles" : [ {
+      "name" : "moto",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost:8080/vehicles/1"
+        },
+        "vehicle" : {
+          "href" : "http://localhost:8080/vehicles/1"
+        }
+      }
+    }, {
+      "name" : "car",
+      "_links" : {
+        "self" : {
+          "href" : "http://localhost:8080/vehicles/2"
+        },
+        "vehicle" : {
+          "href" : "http://localhost:8080/vehicles/2"
+        }
+      }
+    } ]
+  },
+  "_links" : {
+    "self" : {
+      "href" : "http://localhost:8080/vehicles{?page,size,sort}",
+      "templated" : true
+    },
+    "profile" : {
+      "href" : "http://localhost:8080/profile/vehicles"
+    }
+  },
+  "page" : {
+    "size" : 20,
+    "totalElements" : 2,
+    "totalPages" : 1,
+    "number" : 0
+  }
+}
+```
+
+Utiliza el proyecto Spring HATEOAS para exponer API REST más elegantes que utilizan [Richardson Mature Model Level 3](https://restfulapi.net/richardson-maturity-model/) (auto documentación).
+
+Y ya por último también podemos añadirle swagger para poder ver nuestros endpoints tanto de Vehicle Entity como de vehicle-controller
+
+Basta con añadir la dependencia de swagger y volver a compilarlo todo de nuevo
+
+```XML
+    <!-- Swagger UI - Api Documentation -->
+    <dependency>
+        <groupId>io.springfox</groupId>
+        <artifactId>springfox-boot-starter</artifactId>
+        <version>3.0.0</version>
+    </dependency>
+```
+
