@@ -6,7 +6,7 @@ El enfoque más simple es utilizar HTTP Basic, que se activa de forma predetermi
 
 Spring Session (con Spring Security) proporciona una estrategia simple para crear y validar el token basado en el encabezado (id de sesión), se puede usar para proteger las API RESTful.
 
-Además de estos, Spring Security OAuth (un subproyecto bajo Spring Security) proporciona una solución completa de autorización OAuth, incluidas las implementaciones de todos los roles definidos en el protocolo OAuth2, como el servidor de autorización, el servidor de recursos, el cliente OAuth2, etc. Spring Cloud agrega inicio de sesión único capacidad para ** OAuth2 Client ** a través de su subproyecto Spring Cloud Security. En la solución basada en Spring Security OAuth, el contenido del token de acceso puede ser un token JWT firmado o un valor opaco, y tenemos que seguir el flujo de autorización estándar de OAuth2 para obtener el token de acceso.
+Además de estos, Spring Security OAuth (un subproyecto bajo Spring Security) proporciona una solución completa de autorización OAuth, incluidas las implementaciones de todos los roles definidos en el protocolo OAuth2, como el servidor de autorización, el servidor de recursos, el cliente OAuth2, etc. Spring Cloud agrega inicio de sesión único capacidad para `OAuth2 Client` a través de su subproyecto Spring Cloud Security. En la solución basada en Spring Security OAuth, el contenido del token de acceso puede ser un token JWT firmado o un valor opaco, y tenemos que seguir el flujo de autorización estándar de OAuth2 para obtener el token de acceso.
 
 Pero para aquellas aplicaciones que son propiedad del propietario del recurso y no hay un plan para exponer estas API a aplicaciones de terceros, una simple autorización basada en token JWT es más simple y razonable (no necesitamos administrar las credenciales de aplicaciones cliente de terceros). Spring Security en sí no ofrece esa opción; afortunadamente, no es difícil implementarlo entretejiendo nuestro filtro personalizado en la Cadena de filtros de Spring Security. En esta publicación, crearemos una solución de autenticación JWT personalizada.
 
@@ -24,7 +24,7 @@ En esta aplicación de test, el flujo de autenticación basado en token JWT pers
 
 ### Genera el esqueleto del proyecto
 
-La forma más rápida de crear un nuevo proyecto Spring Boot es usar [Spring Initializr] (http://start.spring.io) para generar los códigos base.
+La forma más rápida de crear un nuevo proyecto Spring Boot es usar [Spring Initializr](http://start.spring.io) para generar los códigos base.
 
 abre el navegador y ve a http://start.spring.io. En el campo **Dependencias**, seleccione 
 
