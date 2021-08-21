@@ -777,3 +777,79 @@ Nos devolverá la info de nuestro usuario logueado
 }
 ```
 
+## Paso 4 - Configurar Swagger para usar JWT
+
+Si hemos intentado lanzar alguna consulta desde Swagger UI nos habremos dado cuenta de que sólo funcionan los endpoints que no están securizados y no tenemos posibilidad de añadir las cabeceras.
+
+Esto sucede porque todavía no hemos configurado Swagger. Hasta ahora hemos utilizado la configuración por defecto pero necesitamos poder añadir el token cuando vamos a realizar una request.
+
+Para ello crearemos una clase nueva  `OpenApi30Config ` que definirá nuestro  `ApiKey ` para incluir JWT como autorización en la cabecera y entonces configuraremos el JWT SecurityContext con el global AuthorizationScope.
+
+Y luego, configuramos nuestro bean API Docket para incluir información de API, contextos de seguridad y esquemas de seguridad
+
+```java
+@Configuration
+public class OpenApi30Config {
+
+    private ApiKey apiKey() {
+        return new ApiKey("JWT", "Authorization", "header");
+    }
+
+    private SecurityContext securityContext() {
+        return SecurityContext.builder().securityReferences(defaultAuth()).build();
+    }
+
+    private List<SecurityReference> defaultAuth() {
+        AuthorizationScope authorizationScope = new AuthorizationScope("global", "accessEverything");
+        AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+        authorizationScopes[0] = authorizationScope;
+        return Arrays.asList(new SecurityReference("JWT", authorizationScopes));
+    }
+
+    @Bean
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .securityContexts(Arrays.asList(securityContext()))
+                .securitySchemes(Arrays.asList(apiKey()))
+                .select()
+                .apis(RequestHandlerSelectors.any())
+                .paths(PathSelectors.any())
+                .build();
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfo(
+                "My REST API",
+                "Ejemplo Spring Rest Api con Spring Security JWT",
+                "1.0",
+                "Terms of service",
+                new Contact("Jose", "www.google.com", "email_de_contacto@gmail.com"),
+                "License of API",
+                "API license URL",
+                Collections.emptyList());
+    }
+}
+```
+
+Si arrancamos Spring boot de nuevo y accedemos a la url de swagger veremos que ahora nos aparece un botón con un candado. 
+
+Intentamos obtener todos los usuarios y obtenemos lo siguiente:
+
+```
+{
+    "timestamp": "XXXX-XX-XXTXX:XX:XX.XXX+00:00",
+    "status": 403,
+    "error": "Forbidden",
+    "path": "/users"
+}
+```
+
+Bien, es lo normal. Primero necesitamos loguearnos. Obtenemos el token con la operación `auth/signin` y con el token pulsamos en el candado y ponemos `Bearer ` y el token obtenido
+
+```
+Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwicm9sZXMiOlsiUk9MRV9VU0VSIl0sImlhdCI6MTYyOTU4MDg3OSwiZXhwIjoxNjI5NTg0NDc5fQ.QgdLt0mcBt7LD9FC909hVv8yYVjzzeTAMEYn-glOZ3c
+```
+
+Ahora el candado está cerrado y ya no necesitamos meter más veces el token. Si comprobamos los endpoint deberían funcionar todos sin problemas :)
+
