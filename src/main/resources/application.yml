@@ -20,6 +20,11 @@ spring:
       repositories.enabled: true
       generate-ddl: true
       show-sql: true
+security:
+  jwt:
+    token:
+      secret-key: nuestra_secret-key_que es larga 234232_
+      expire-length: 3600000
 
 logging:
   level:
