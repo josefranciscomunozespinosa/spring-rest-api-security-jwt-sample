@@ -16,7 +16,7 @@ import static org.springframework.http.ResponseEntity.*;
 @RequestMapping("/v1/vehicles")
 public class VehicleController {
 
-    private VehicleRepository vehicles;
+    private final VehicleRepository vehicles;
 
     public VehicleController(VehicleRepository vehicles) {
         this.vehicles = vehicles;
