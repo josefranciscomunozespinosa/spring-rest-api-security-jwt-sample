@@ -87,12 +87,12 @@ public class VehicleController {
     }
 
 
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity all() {
         return ok(this.vehicles.findAll());
     }
 
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity save(@RequestBody VehicleForm form, HttpServletRequest request) {
         Vehicle saved = this.vehicles.save(Vehicle.builder().name(form.getName()).build());
         return created(
