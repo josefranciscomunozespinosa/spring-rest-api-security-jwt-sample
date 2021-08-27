@@ -21,6 +21,11 @@ En esta aplicación de test, el flujo de autenticación basado en token JWT pers
 6. Si el token JWT es válido, devolverá el recurso solicitado al cliente.
 
 ## Paso 1 - REST, configuración BBDD y spring security por defecto
+Es importante que no hagáis sólo copy&paste e intentéis entender qué significa cada cosa. Las anotaciones que se utilizan, cada método, etc.
+
+Copiar y pegar sabemos hacerlo todos. Pero es importante que al menos intentemos comprender el código que vamos a ir viendo.
+
+Vamos allá!
 
 ### Genera el esqueleto del proyecto
 
